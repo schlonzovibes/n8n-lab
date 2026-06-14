@@ -1,0 +1,266 @@
+{
+  "updatedAt": "2026-06-14T09:02:51.089Z",
+  "createdAt": "2026-06-10T09:13:17.688Z",
+  "id": "uCL3qQjs9RB4Lf7r",
+  "name": "06-Error-Handling",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        240
+      ],
+      "id": "deb54acf-7749-48bb-b18d-e786a9516070",
+      "name": "When clicking \u2018Execute workflow\u2019"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/chat/",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"model\": \"llama3.1:8b\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Klassifiziere deutsche Support-E-Mails gem\u00e4\u00df dem vorgegebenen JSON-Schema.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Sehr geehrte Damen und Herren, mein Telefon klingelt seit gestern nicht mehr, obwohl ich Anrufe erwarte. Bitte dringend pr\u00fcfen!\"\n    }\n  ],\n  \"stream\": false,\n  \"format\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"summary\": {\n        \"type\": \"string\"\n      },\n      \"urgency\": {\n        \"type\": \"string\",\n        \"enum\": [\"low\", \"medium\", \"high\"]\n      },\n      \"category\": {\n        \"type\": \"string\",\n        \"enum\": [\"technical\", \"support\", \"inquiry\", \"random\"]\n      }\n    },\n    \"required\": [\n      \"summary\",\n      \"urgency\",\n      \"category\"\n    ]\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -832,
+        240
+      ],
+      "id": "6c619dc0-e4f2-4ea1-9d49-02980e6c69a9",
+      "name": "HTTP Request",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/chat/WRONGMAKEERROR",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"model\": \"qwen3.6:27b\",\n  \"messages\": [\n    {\"role\": \"system\", \"content\": \"Du bist ein Klassifikator f\u00fcr deutsche Support-E-Mails. Antworte ausschlie\u00dflich mit g\u00fcltigem JSON: {\\\"summary\\\": string, \\\"urgency\\\": \\\"low\\\"|\\\"medium\\\"|\\\"high\\\", \\\"category\\\": string}. Kein Flie\u00dftext, kein Markdown, keine Code-Fences.\"},\n    {\"role\": \"user\", \"content\": \"Sehr geehrte Damen und Herren, mein Telefon klingelt seit gestern nicht mehr, obwohl ich Anrufe erwarte. Bitte dringend pr\u00fcfen!\"}\n  ],\n  \"stream\": false,\n  \"options\": {\"temperature\": 0.1}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -688,
+        -208
+      ],
+      "id": "50d737aa-806d-4de9-9c51-192af193d45b",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "91681997-7939-48b9-8525-f6782f72fe13",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -624,
+        240
+      ],
+      "id": "60861046-e9f9-4106-9594-6c41693f81c6",
+      "name": "If: Has HTTP Error?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        0,
+        432
+      ],
+      "id": "4574f0ad-7e25-4f2c-93ad-b9327428c18b",
+      "name": "Parse Failed"
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n  const raw = $json.message.content\n    .replace(/```json\\n?/g, '')\n    .replace(/```/g, '')\n    .trim();\n  return [{ json: { result: JSON.parse(raw), success: true }}];\n} catch(e) {\n  return [{ json: { result: null, success: false, rawOutput: $json.message.content }}];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        256
+      ],
+      "id": "47219384-2f37-4d91-93d1-08c86e339188",
+      "name": "Code in JavaScript",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        432
+      ],
+      "id": "e61d8df9-8d24-41f6-a282-aa0c99a646aa",
+      "name": "Error HTTP"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "de2ba1d2-efae-49ce-9d79-80db2a4659bb",
+              "name": "message.content",
+              "value": "={{ $json.message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -400,
+        256
+      ],
+      "id": "e41773cc-d4e9-42b3-a46b-9760204f9792",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst stats = {};\n\nfor (const item of items) {\n  const category = (item.json.result.category || 'unknown').toLowerCase();\n  const urgency = (item.json.result.urgency || 'unknown').toLowerCase();\n\n  if (!stats[category]) {\n    stats[category] = {\n      total: 0,\n      high: 0,\n      medium: 0,\n      low: 0\n    };\n  }\n\n  stats[category].total++;\n\n  if (urgency === 'high') stats[category].high++;\n  if (urgency === 'medium') stats[category].medium++;\n  if (urgency === 'low') stats[category].low++;\n}\n\nreturn [\n  {\n    json: stats\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        240
+      ],
+      "id": "59f42441-ec11-4fef-90f3-5942ab758a8c",
+      "name": "Count"
+    }
+  ],
+  "connections": {
+    "When clicking \u2018Execute workflow\u2019": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If: Has HTTP Error?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If: Has HTTP Error?": {
+      "main": [
+        [
+          {
+            "node": "Error HTTP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Count",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Parse Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "81c9871e-9bb3-4bd4-83f0-9276ce678e7a",
+  "activeVersionId": null,
+  "versionCounter": 128,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-06-10T09:13:17.692Z",
+      "createdAt": "2026-06-10T09:13:17.692Z",
+      "role": "workflow:owner",
+      "workflowId": "uCL3qQjs9RB4Lf7r",
+      "projectId": "byVWfFHmU6imD002",
+      "project": {
+        "updatedAt": "2026-06-07T08:46:52.498Z",
+        "createdAt": "2026-06-07T08:43:18.289Z",
+        "id": "byVWfFHmU6imD002",
+        "name": "Achim Karim <d_o_z_e_r@gmx.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "982552bf-c16a-48d5-aecc-54ef0104226c"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}

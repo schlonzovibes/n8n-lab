@@ -1,0 +1,275 @@
+{
+  "updatedAt": "2026-06-07T13:08:57.570Z",
+  "createdAt": "2026-06-07T09:36:19.012Z",
+  "id": "BjB2es2AZomB99XE",
+  "name": "03-CallOllama",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "classify",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -336,
+        48
+      ],
+      "id": "0c39ceb8-4432-422d-8e81-3483b92e69e1",
+      "name": "Webhook1",
+      "webhookId": "c2d5e0ec-ea5b-4e46-b69a-0f2a77ab2758",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.message.content }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        880,
+        80
+      ],
+      "id": "0ee99bae-c744-4d04-9226-c2f23eb558dc",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gemma4:26b\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Du bist ein Extraktions- und Klassifikationssystem f\u00fcr Kundennachrichten im Kundensupport.\\nDeine Aufgabe: Reduziere die eingehende Nachricht auf ihren Kern und gib das Ergebnis\\nausschlie\u00dflich als valides JSON-Objekt zur\u00fcck.\\n\\nREGELN\\n- Antworte NUR mit dem JSON-Objekt. Kein Flie\u00dftext, keine Erkl\u00e4rung, keine Markdown-Backticks.\\n- Erfinde keine Informationen. Felder, f\u00fcr die es keine Grundlage in der Nachricht gibt,\\n  werden auf null gesetzt (bzw. leeres Array, wo angegeben).\\n- \\\"kernaussage\\\" ist eine knappe, neutrale Umformulierung des eigentlichen Anliegens\\n  in einem Satz, in der dritten Person, ohne H\u00f6flichkeitsfloskeln oder F\u00fcllw\u00f6rter.\\n- \u00dcbernimm die Sprache der Originalnachricht im Feld \\\"sprache\\\" (ISO-639-1, z. B. \\\"de\\\", \\\"en\\\").\\n\\nKATEGORIEN (kategorie)\\n- \\\"frage\\\"            \u2013 allgemeine Informationsanfrage\\n- \\\"problem\\\"          \u2013 technisches oder funktionales Problem\\n- \\\"beschwerde\\\"       \u2013 Unzufriedenheit, Reklamation\\n- \\\"bestellung\\\"       \u2013 Bestellung, Lieferung, Status\\n- \\\"abrechnung\\\"       \u2013 Rechnung, Zahlung, Erstattung\\n- \\\"kuendigung\\\"       \u2013 Vertrag/Abo beenden oder \u00e4ndern\\n- \\\"lob\\\"              \u2013 positives Feedback\\n- \\\"sonstiges\\\"        \u2013 nichts davon passt\\n\\nAUSGABEFORMAT\\n{\\n  \\\"kernaussage\\\": string,\\n  \\\"kategorie\\\": \\\"frage|problem|beschwerde|bestellung|abrechnung|kuendigung|lob|sonstiges\\\",\\n  \\\"stimmung\\\": \\\"positiv|neutral|negativ\\\",\\n  \\\"dringlichkeit\\\": \\\"niedrig|mittel|hoch\\\",\\n  \\\"gewuenschte_aktion\\\": string | null,\\n  \\\"entitaeten\\\": {\\n    \\\"produkt\\\": string | null,\\n    \\\"bestellnummer\\\": string | null,\\n    \\\"betrag\\\": string | null,\\n    \\\"datum\\\": string | null\\n  },\\n  \\\"sprache\\\": string\\n}\\n\\nBEISPIEL\\nEingabe:\\n\\\"Hallo, ich habe vor zwei Wochen die Bestellung #48213 aufgegeben und bisher nichts\\nerhalten. Das ist echt \u00e4rgerlich, ich brauche das Teil dringend f\u00fcr n\u00e4chste Woche.\\nK\u00f6nnen Sie mir sagen, wo das Paket steckt?\\\"\\n\\nAusgabe:\\n{\\n  \\\"kernaussage\\\": \\\"Kunde hat keine Lieferung zur Bestellung #48213 erhalten und fragt nach dem Versandstatus.\\\",\\n  \\\"kategorie\\\": \\\"bestellung\\\",\\n  \\\"stimmung\\\": \\\"negativ\\\",\\n  \\\"dringlichkeit\\\": \\\"hoch\\\",\\n  \\\"gewuenschte_aktion\\\": \\\"Lieferstatus der Bestellung mitteilen\\\",\\n  \\\"entitaeten\\\": {\\n    \\\"produkt\\\": null,\\n    \\\"bestellnummer\\\": \\\"#48213\\\",\\n    \\\"betrag\\\": null,\\n    \\\"datum\\\": null\\n  },\\n  \\\"sprache\\\": \\\"de\\\"\\n}\\n\\nVerarbeite nun die folgende Kundennachricht:\"\n    },\n    {\n      \"role\": \"customer\",\n      \"content\": \"{{ $json.body.email }}\"\n    }\n  ],\n  \"stream\": false,\n  \"options\": {\n    \"temperature\": 0.1\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -32,
+        304
+      ],
+      "id": "e6750103-d094-47f7-a753-23032718ac2c",
+      "name": "HTTP Gemma"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"qwen3.6:27b\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Du bist ein Extraktions- und Klassifikationssystem f\u00fcr Kundennachrichten im Kundensupport.\\nDeine Aufgabe: Reduziere die eingehende Nachricht auf ihren Kern und gib das Ergebnis\\nausschlie\u00dflich als valides JSON-Objekt zur\u00fcck.\\n\\nREGELN\\n- Antworte NUR mit dem JSON-Objekt. Kein Flie\u00dftext, keine Erkl\u00e4rung, keine Markdown-Backticks.\\n- Erfinde keine Informationen. Felder, f\u00fcr die es keine Grundlage in der Nachricht gibt,\\n  werden auf null gesetzt (bzw. leeres Array, wo angegeben).\\n- \\\"kernaussage\\\" ist eine knappe, neutrale Umformulierung des eigentlichen Anliegens\\n  in einem Satz, in der dritten Person, ohne H\u00f6flichkeitsfloskeln oder F\u00fcllw\u00f6rter.\\n- \u00dcbernimm die Sprache der Originalnachricht im Feld \\\"sprache\\\" (ISO-639-1, z. B. \\\"de\\\", \\\"en\\\").\\n\\nKATEGORIEN (kategorie)\\n- \\\"frage\\\"            \u2013 allgemeine Informationsanfrage\\n- \\\"problem\\\"          \u2013 technisches oder funktionales Problem\\n- \\\"beschwerde\\\"       \u2013 Unzufriedenheit, Reklamation\\n- \\\"bestellung\\\"       \u2013 Bestellung, Lieferung, Status\\n- \\\"abrechnung\\\"       \u2013 Rechnung, Zahlung, Erstattung\\n- \\\"kuendigung\\\"       \u2013 Vertrag/Abo beenden oder \u00e4ndern\\n- \\\"lob\\\"              \u2013 positives Feedback\\n- \\\"sonstiges\\\"        \u2013 nichts davon passt\\n\\nAUSGABEFORMAT\\n{\\n  \\\"kernaussage\\\": string,\\n  \\\"kategorie\\\": \\\"frage|problem|beschwerde|bestellung|abrechnung|kuendigung|lob|sonstiges\\\",\\n  \\\"stimmung\\\": \\\"positiv|neutral|negativ\\\",\\n  \\\"dringlichkeit\\\": \\\"niedrig|mittel|hoch\\\",\\n  \\\"gewuenschte_aktion\\\": string | null,\\n  \\\"entitaeten\\\": {\\n    \\\"produkt\\\": string | null,\\n    \\\"bestellnummer\\\": string | null,\\n    \\\"betrag\\\": string | null,\\n    \\\"datum\\\": string | null\\n  },\\n  \\\"sprache\\\": string\\n}\\n\\nBEISPIEL\\nEingabe:\\n\\\"Hallo, ich habe vor zwei Wochen die Bestellung #48213 aufgegeben und bisher nichts\\nerhalten. Das ist echt \u00e4rgerlich, ich brauche das Teil dringend f\u00fcr n\u00e4chste Woche.\\nK\u00f6nnen Sie mir sagen, wo das Paket steckt?\\\"\\n\\nAusgabe:\\n{\\n  \\\"kernaussage\\\": \\\"Kunde hat keine Lieferung zur Bestellung #48213 erhalten und fragt nach dem Versandstatus.\\\",\\n  \\\"kategorie\\\": \\\"bestellung\\\",\\n  \\\"stimmung\\\": \\\"negativ\\\",\\n  \\\"dringlichkeit\\\": \\\"hoch\\\",\\n  \\\"gewuenschte_aktion\\\": \\\"Lieferstatus der Bestellung mitteilen\\\",\\n  \\\"entitaeten\\\": {\\n    \\\"produkt\\\": null,\\n    \\\"bestellnummer\\\": \\\"#48213\\\",\\n    \\\"betrag\\\": null,\\n    \\\"datum\\\": null\\n  },\\n  \\\"sprache\\\": \\\"de\\\"\\n}\\n\\nVerarbeite nun die folgende Kundennachricht:\"\n    },\n    {\n      \"role\": \"customer\",\n      \"content\": \"{{ $json.body.email }}\"\n    }\n  ],\n  \"stream\": false,\n  \"options\": {\n    \"temperature\": 0.1\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -32,
+        144
+      ],
+      "id": "b230b2fb-23f9-4f86-aa72-e941d88e9a9e",
+      "name": "HTTP Qwen"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aacc1e56-1038-46c0-a8d0-219ea8e266ba",
+              "name": "message.content",
+              "value": "=\"Du bist ein pr\u00e4ziser, neutraler Evaluator f\u00fcr ein Extraktions- und\nKlassifikationssystem im Kundensupport. Zwei Modelle (Qwen und Llama) haben\ndieselbe Kundennachricht zu einem festen JSON-Schema verarbeitet. Du bewertest\nausschlie\u00dflich die Qualit\u00e4t dieser beiden JSON-Ausgaben gegen die\nOriginalnachricht. Du analysierst die Nachricht NICHT f\u00fcr den Kunden und\nbeantwortest sie nicht.\n\n# Eingaben\n<kunden_nachricht>\n{{ $json.body.email }}\n</kunden_nachricht>\n\n<ausgabe_qwen>\n{{ $('HTTP Qwen').json.message.content }}\n</ausgabe_qwen>\n\n<ausgabe_gemma>\n{{ $('HTTP Gemma').json.message.content }}\n</ausgabe_gemma>\n\n# Zielschema (so sollten beide Ausgaben aussehen)\n{\n  \"kernaussage\": string,\n  \"kategorie\": \"frage|problem|beschwerde|bestellung|abrechnung|kuendigung|lob|sonstiges\",\n  \"stimmung\": \"positiv|neutral|negativ\",\n  \"dringlichkeit\": \"niedrig|mittel|hoch\",\n  \"gewuenschte_aktion\": string | null,\n  \"entitaeten\": { \"produkt\": string|null, \"bestellnummer\": string|null,\n                  \"betrag\": string|null, \"datum\": string|null },\n  \"sprache\": string (ISO-639-1)\n}\n\n# Vorgehen\n1. Leite zuerst INTERN aus der Kundennachricht eine Referenz ab: die korrekte\n   Kategorie, Stimmung, Dringlichkeit, die tats\u00e4chlich vorhandenen Entit\u00e4ten und\n   die tats\u00e4chlich gew\u00fcnschte Aktion. Diese Referenz ist deine Grundwahrheit.\n2. Pr\u00fcfe jede Ausgabe einzeln gegen Schema und Referenz nach den Kriterien unten.\n3. Behandle Felder, f\u00fcr die es in der Nachricht keine Grundlage gibt, als\n   korrekt NUR wenn sie null (bzw. der passende Leerwert) sind. Ein erfundener\n   Nicht-null-Wert ist eine Halluzination und der schwerste Fehler.\n\n# Kriterien\n- schema_valide: Ist die Ausgabe valides JSON, sind alle Felder vorhanden, die\n  Datentypen korrekt und die Enum-Werte (kategorie, stimmung, dringlichkeit)\n  exakt aus der erlaubten Liste? Zus\u00e4tzlicher Flie\u00dftext oder Markdown-Backticks\n  au\u00dferhalb des JSON gelten als Versto\u00df.\n- kernaussage (Score 1-5): Ein Satz, dritte Person, neutral, ohne\n  H\u00f6flichkeitsfloskeln/F\u00fcllw\u00f6rter, trifft das tats\u00e4chliche Anliegen vollst\u00e4ndig\n  und korrekt. Abzug f\u00fcr mehrere S\u00e4tze, Ich-/Du-Form, Floskeln, Auslassungen\n  oder Erfindungen.\n- kategorie_korrekt / stimmung_korrekt / dringlichkeit_korrekt: stimmt mit deiner\n  Referenz \u00fcberein. Bei echter Mehrdeutigkeit gilt eine plausibel begr\u00fcndbare\n  Wahl als korrekt; vermerke die Mehrdeutigkeit im Kommentar.\n- gewuenschte_aktion_korrekt: gibt die gew\u00fcnschte Aktion zutreffend wieder bzw.\n  ist korrekt null, wenn keine erkennbar ist.\n- entitaeten_korrekt: Alle in der Nachricht vorhandenen Entit\u00e4ten sind erfasst\n  (kein Auslassen) und korrekt zugeordnet (produkt/bestellnummer/betrag/datum);\n  nicht vorhandene Entit\u00e4ten sind null.\n- entitaeten_halluzination (oder allgemein erfundene Werte): true, wenn\n  irgendein Nicht-null-Wert keine Grundlage in der Nachricht hat.\n- sprache_korrekt: korrekter ISO-639-1-Code der Originalnachricht.\n\n# Gesamtscore (0-100, deterministisch berechnen)\n- schema valide: 15 (sonst 0 und Gesamtscore zus\u00e4tzlich auf max. 50 deckeln)\n- kernaussage: (Score/5) * 20\n- kategorie_korrekt: 15\n- stimmung_korrekt: 10\n- dringlichkeit_korrekt: 10\n- gewuenschte_aktion_korrekt: 10\n- entitaeten_korrekt: 20\n- Bei entitaeten_halluzination = true oder einem sonstigen erfundenen Wert:\n  ziehe zus\u00e4tzlich 25 Punkte vom Gesamtscore ab (nicht unter 0).\n\n# Ausgabeformat\nAntworte AUSSCHLIESSLICH mit g\u00fcltigem JSON, ohne Markdown, ohne einleitenden\noder abschlie\u00dfenden Text:\n\n{\n  \"qwen\": {\n    \"schema_valide\": <bool>,\n    \"schema_fehler\": [<string>, ...],\n    \"kernaussage_score\": <1-5>,\n    \"kernaussage_kommentar\": \"<kurz>\",\n    \"kategorie_korrekt\": <bool>,\n    \"stimmung_korrekt\": <bool>,\n    \"dringlichkeit_korrekt\": <bool>,\n    \"gewuenschte_aktion_korrekt\": <bool>,\n    \"entitaeten_korrekt\": <bool>,\n    \"entitaeten_halluzination\": <bool>,\n    \"sprache_korrekt\": <bool>,\n    \"gesamt\": <0-100>,\n    \"schwaechen\": \"<kurz>\"\n  },\n  \"llama\": {\n    \"schema_valide\": <bool>,\n    \"schema_fehler\": [<string>, ...],\n    \"kernaussage_score\": <1-5>,\n    \"kernaussage_kommentar\": \"<kurz>\",\n    \"kategorie_korrekt\": <bool>,\n    \"stimmung_korrekt\": <bool>,\n    \"dringlichkeit_korrekt\": <bool>,\n    \"gewuenschte_aktion_korrekt\": <bool>,\n    \"entitaeten_korrekt\": <bool>,\n    \"entitaeten_halluzination\": <bool>,\n    \"sprache_korrekt\": <bool>,\n    \"gesamt\": <0-100>,\n    \"schwaechen\": \"<kurz>\"\n  },\n  \"gewinner\": \"<qwen|llama|tie>\",\n  \"begruendung\": \"<1-2 S\u00e4tze>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        80
+      ],
+      "id": "615a31a3-ff2c-476e-be41-4b8db2391718",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  model: \"nemotron-cascade-2:latest\",\n  messages: [\n    {\n      role: \"system\",\n      content: $json.message.content\n    }\n  ],\n  stream: false\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        624,
+        80
+      ],
+      "id": "f48ac30c-8b2f-4ee0-afde-7f1db3efeb51",
+      "name": "HTTP Nemotron"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        176,
+        64
+      ],
+      "id": "d2bbc274-994c-4f9c-b871-476a3e19c78a",
+      "name": "Merge"
+    }
+  ],
+  "connections": {
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Qwen",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Gemma",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Qwen": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HTTP Gemma": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Nemotron",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Nemotron": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "73eb33b2-ccb7-48d2-87c0-222708aba3b5",
+  "activeVersionId": null,
+  "versionCounter": 178,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-06-07T09:36:19.013Z",
+      "createdAt": "2026-06-07T09:36:19.013Z",
+      "role": "workflow:owner",
+      "workflowId": "BjB2es2AZomB99XE",
+      "projectId": "byVWfFHmU6imD002",
+      "project": {
+        "updatedAt": "2026-06-07T08:46:52.498Z",
+        "createdAt": "2026-06-07T08:43:18.289Z",
+        "id": "byVWfFHmU6imD002",
+        "name": "Achim Karim <d_o_z_e_r@gmx.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "982552bf-c16a-48d5-aecc-54ef0104226c"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}

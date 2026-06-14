@@ -1,0 +1,119 @@
+{
+  "updatedAt": "2026-06-07T09:36:03.265Z",
+  "createdAt": "2026-06-07T09:30:40.279Z",
+  "id": "1c47htQT2FmiLCR8",
+  "name": "02-Trigger-HttpRequest-Edit",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0290b411-4534-4391-a732-3abbde6ee834",
+      "name": "When clicking \u2018Execute workflow\u2019"
+    },
+    {
+      "parameters": {
+        "url": "https://jsonplaceholder.typicode.com/todos",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4babb565-339a-4f51-a488-e30f264d4952",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3a6a510b-60c8-4b94-af65-f69771b2995c",
+              "name": "title",
+              "value": "=Extracted Title: {{ $json.title }}, Extracted ID: {{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "cdc138a5-9aa5-4593-ac05-3e4b9970a3f7",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "When clicking \u2018Execute workflow\u2019": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "537c051a-c441-4436-8ab0-4c14030abfc8",
+  "activeVersionId": null,
+  "versionCounter": 12,
+  "triggerCount": 0,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-06-07T09:30:40.281Z",
+      "createdAt": "2026-06-07T09:30:40.281Z",
+      "role": "workflow:owner",
+      "workflowId": "1c47htQT2FmiLCR8",
+      "projectId": "byVWfFHmU6imD002",
+      "project": {
+        "updatedAt": "2026-06-07T08:46:52.498Z",
+        "createdAt": "2026-06-07T08:43:18.289Z",
+        "id": "byVWfFHmU6imD002",
+        "name": "Achim Karim <d_o_z_e_r@gmx.net>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "982552bf-c16a-48d5-aecc-54ef0104226c"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}
