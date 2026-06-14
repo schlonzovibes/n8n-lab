@@ -1,0 +1,946 @@
+[
+  {
+    "updatedAt": "2026-06-08T13:55:55.679Z",
+    "createdAt": "2026-06-08T06:34:59.998Z",
+    "id": "nNi2GCKei7EmdzUl",
+    "name": "00-Agent",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+        "typeVersion": 1.4,
+        "position": [
+          -832,
+          -48
+        ],
+        "id": "fb067563-2823-48a8-820a-cdd0c6c37f26",
+        "name": "When chat message received",
+        "webhookId": "cf303e06-0a82-4dc1-8a0e-43435f0401a4"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=You are a job discovery and CV matching agent.\n\nINPUTS\n\nCV text\nInternet access\nGoogle Sheets\n\nGoogle Sheet columns:\n\njobtitle\ncompany\nwebsite\ndescription\nfeedback\nrating\n\nTASK\n\nClear all existing spreadsheet rows except the header.\nProcess the provided career websites sequentially, one website at a time.\nFor each website:\nFind all currently open positions.\nOpen each position individually.\nIf the job links to another site, follow the link to the full job description.\nRead the complete job description.\nIgnore closed, expired, duplicate, or non-job pages.\nExtract:\njobtitle\ncompany\nwebsite (direct job URL)\ndescription (concise summary)\nCompare the full job description against the CV.\nIdentify matching qualifications, skills, experience, and gaps.\nWrite a concise explanation in feedback.\nAssign a rating from 0-100:\n90-100 = Excellent fit\n75-89 = Strong fit\n60-74 = Moderate fit\n40-59 = Weak fit\n0-39 = Poor fit\nImmediately append one new row to Google Sheets for each job:\njobtitle\ncompany\nwebsite\ndescription\nfeedback\nrating\n\nRULES\n\nProcess jobs one-by-one.\nComplete all jobs from the current website before moving to the next website.\nFollow external application links when necessary.\nDo not create duplicate rows.\nDo not invent information.\nThe spreadsheet is the primary output.\nContinue until every provided website has been fully processed.\n\nProcess the following websites:\n{{ $json.chatInput }}",
+          "options": {
+            "maxIterations": 20,
+            "returnIntermediateSteps": true
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          208,
+          0
+        ],
+        "id": "0f35d631-5a7f-4e57-bf51-a648d9660360",
+        "name": "AI Agent"
+      },
+      {
+        "parameters": {},
+        "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+        "typeVersion": 1.4,
+        "position": [
+          208,
+          208
+        ],
+        "id": "f529d16d-4b7c-420b-9b1e-ea54fdadefe8",
+        "name": "Simple Memory"
+      },
+      {
+        "parameters": {
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "root",
+            "cachedResultName": "/ (Root folder)"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDriveTool",
+        "typeVersion": 3,
+        "position": [
+          496,
+          384
+        ],
+        "id": "580cd68f-4d7a-4d71-a63c-a7f99a47efa4",
+        "name": "Upload file in Google Drive",
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "WUzuHSkBoq4gIroI",
+            "name": "Google Drive account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1200,
+          0
+        ],
+        "id": "e221f453-7028-441b-9ff0-fd1a134c1359",
+        "name": "AI Agent1"
+      },
+      {
+        "parameters": {
+          "model": "deepseek-r1:32b",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+        "typeVersion": 1,
+        "position": [
+          1184,
+          208
+        ],
+        "id": "b0a41c0e-a9cf-4ab7-8752-0039599468df",
+        "name": "DeepSeekR1",
+        "credentials": {
+          "ollamaApi": {
+            "id": "8Lrh9Ad98UHXPlkG",
+            "name": "Ollama account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": "qwen3.6:latest",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+        "typeVersion": 1,
+        "position": [
+          80,
+          208
+        ],
+        "id": "ed718b77-62de-4c31-9221-23e7e780c224",
+        "name": "Qwen3.6",
+        "credentials": {
+          "ollamaApi": {
+            "id": "8Lrh9Ad98UHXPlkG",
+            "name": "Ollama account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "hasOutputParser": true,
+          "batching": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.9,
+        "position": [
+          224,
+          -352
+        ],
+        "id": "0bd8a58a-c00b-4408-9beb-18e60dcfc707",
+        "name": "Basic LLM Chain"
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "output.assigned_agents",
+          "include": "selectedOtherFields",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          576,
+          -368
+        ],
+        "id": "61ddcd5a-6aac-4d54-8672-fbf7aed47f88",
+        "name": "Split Out"
+      },
+      {
+        "parameters": {
+          "jsonSchemaExample": "{\n\t\"assigned_agents\":[\"Thinker\", \"Coder\", \"Validator\"]\n}"
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          368,
+          -192
+        ],
+        "id": "23018d0e-e79f-4875-b8d7-954cd8a4d235",
+        "name": "Structured Output Parser"
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "=\"Thinker\" {{ $('Basic LLM Chain').item.json.output.assigned_agents }}",
+                      "rightValue": "thinker",
+                      "operator": {
+                        "type": "string",
+                        "operation": "contains"
+                      },
+                      "id": "1f1f98d8-50bf-498a-8a2b-28d3f3f16d8c"
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "ed1b9aaf-38d9-40af-8576-794ee106fd41",
+                      "leftValue": "=\"Coder\" {{ $('Basic LLM Chain').item.json.output.assigned_agents }}",
+                      "rightValue": "coder",
+                      "operator": {
+                        "type": "string",
+                        "operation": "contains"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "817df839-afde-4759-b553-c61b82ac74c6",
+                      "leftValue": "=\"Validator\" {{ $('Basic LLM Chain').item.json.output.assigned_agents }}",
+                      "rightValue": "validator",
+                      "operator": {
+                        "type": "string",
+                        "operation": "contains"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
+        "position": [
+          720,
+          -368
+        ],
+        "id": "9068785c-4271-4a6f-bd3d-44cd4f0f6f13",
+        "name": "Switch"
+      },
+      {
+        "parameters": {},
+        "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+        "typeVersion": 1.4,
+        "position": [
+          1312,
+          208
+        ],
+        "id": "ae6be06d-57dd-482c-a62e-f34eec1dc784",
+        "name": "Simple Memory1"
+      },
+      {
+        "parameters": {
+          "resource": "spreadsheet",
+          "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}",
+          "sheetsUi": {
+            "sheetValues": [
+              {
+                "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('sheetValues0_Title', ``, 'string') }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheetsTool",
+        "typeVersion": 4.7,
+        "position": [
+          688,
+          224
+        ],
+        "id": "732a49d1-a9ac-41a1-b387-66c366f62ba8",
+        "name": "Create",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "TegIyIzcGUDmULvl",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1rOtf0P9Jswqd8l9G4OVh9z7H7dvfdzvs6ROq2T20Wnw",
+            "mode": "list",
+            "cachedResultName": "Joblist",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rOtf0P9Jswqd8l9G4OVh9z7H7dvfdzvs6ROq2T20Wnw/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rOtf0P9Jswqd8l9G4OVh9z7H7dvfdzvs6ROq2T20Wnw/edit#gid=0"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheetsTool",
+        "typeVersion": 4.7,
+        "position": [
+          816,
+          384
+        ],
+        "id": "55f17102-360b-49c6-8280-5229ab77ac33",
+        "name": "Get",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "TegIyIzcGUDmULvl",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+          "options": {}
+        },
+        "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+        "typeVersion": 1,
+        "position": [
+          208,
+          384
+        ],
+        "id": "39b14dca-306a-44be-a710-398bc7e16dc8",
+        "name": "Tavily",
+        "credentials": {
+          "tavilyApi": {
+            "id": "Ys9VfSksZpjP2Yaj",
+            "name": "Tavily account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+          "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+          "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmailTool",
+        "typeVersion": 2.2,
+        "position": [
+          336,
+          384
+        ],
+        "id": "623bb09b-ac1e-4c69-9cf3-e2376aab69da",
+        "name": "Gmail",
+        "webhookId": "1fd1096e-0568-4831-9b42-c7d4dec05376",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "HNjiU7UHNajhLoec",
+            "name": "Gmail account 2"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineByPosition",
+          "numberInputs": 4,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          -176,
+          -32
+        ],
+        "id": "960e9221-650a-45d7-a727-108829df6bfa",
+        "name": "Merge"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "586d0be2-bd41-46a5-b9aa-60b0c37f2c2e",
+                "name": "chatInput",
+                "value": "={{ $json.chatInput }}\n\n{{ $json.prompt }}\n\nTHIS IS MY CV\n{{ $json.cv }}\n\nSEARCH THESE WEBSITES\n{{ $json.websites }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          16,
+          0
+        ],
+        "id": "a237127f-0e3e-48d6-89ae-7869858a0103",
+        "name": "Build Prompt"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "abfc95d9-3901-482f-aed5-81e6b508be6f",
+                "name": "prompt",
+                "value": "You are a job discovery and CV matching agent.\n\nINPUT\nwebsearch\nCV text\n\nOUTPUT\ngoogle sheet - The spreadsheet is the primary output.\nDo not create a column \"chatInput\" and do not paste the chat!\n\nGOOGLE SHEET COLUMNS\njobtitle\nThe title of the job posting.\n\ncompany\nThe employer name.\n\ncountry\nCountry where the job is located.\n\nwebsite\nDirect URL to the job posting.\n\ndescription\nSummary of the job.\n\nfeedback\nCV matching analysis.\n\nrating\nInteger 0-100.\n\n\nALWAYS FOLLOW THIS WORKFLOW:\n\n1. Search only the provided career websites.\n2. Process websites one-by-one.\n3. Find all open jobs.\n4. Open every job posting.\n5. Follow external application links to the full job description.\n6. Extract:\n   - jobtitle\n   - company\n   - country\n   - website url\n   - job description\n7. Compare the job description against the CV.\n8. Generate feedback.\n9. Generate a job matching rate from 0-100.\n10. Append one row to Google Sheets, containing the following collumns:\n   - jobtitle\n   - company\n   - country\n   - website url\n   - job description\n   - match feedback\n   - match rating\n11. Continue until all jobs on the current website are processed.\n13. Forget\n12. Then move to the next website.\n\n\n\n\n\n\n",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -592,
+          -160
+        ],
+        "id": "ba03d6dd-bb9f-49c7-b3c3-f56af709bf5e",
+        "name": "Fixed Prompt"
+      },
+      {
+        "parameters": {
+          "fileSelector": "/home/node/.n8n-files/CV/TXT_Achim Stromberger CV Technical Artist EN.txt",
+          "options": {
+            "fileExtension": ".txt",
+            "dataPropertyName": "data"
+          }
+        },
+        "type": "n8n-nodes-base.readWriteFile",
+        "typeVersion": 1.1,
+        "position": [
+          -592,
+          16
+        ],
+        "id": "e89df170-4b89-4e8b-bbf9-c71333ebbfca",
+        "name": "Read CV",
+        "alwaysOutputData": false
+      },
+      {
+        "parameters": {
+          "operation": "text",
+          "destinationKey": "cv",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1.1,
+        "position": [
+          -432,
+          16
+        ],
+        "id": "18e9ee00-b14b-428d-9cb5-839449dbe0d3",
+        "name": "Extract from File"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "abfc95d9-3901-482f-aed5-81e6b508be6f",
+                "name": "websites",
+                "value": "Process the following websites:  \n\nhttps://www.factsfiction.de/en/jobs \nhttps://demner.group/jobs/ \n\n",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -592,
+          208
+        ],
+        "id": "dab7ba1d-cc5f-443c-beb8-2f9dd7f729ca",
+        "name": "Websites"
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1rOtf0P9Jswqd8l9G4OVh9z7H7dvfdzvs6ROq2T20Wnw",
+            "mode": "list",
+            "cachedResultName": "Joblist",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rOtf0P9Jswqd8l9G4OVh9z7H7dvfdzvs6ROq2T20Wnw/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rOtf0P9Jswqd8l9G4OVh9z7H7dvfdzvs6ROq2T20Wnw/edit#gid=0"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {
+              "Job Title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Job_Title', ``, 'string') }}",
+              "Company": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Company', ``, 'string') }}",
+              "Website": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Website', ``, 'string') }}",
+              "Job Description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Job_Description', ``, 'string') }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "Job Title",
+                "displayName": "Job Title",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Company",
+                "displayName": "Company",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Website",
+                "displayName": "Website",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Job Description",
+                "displayName": "Job Description",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Feedback",
+                "displayName": "Feedback",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Rating",
+                "displayName": "Rating",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {
+            "cellFormat": "USER_ENTERED"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheetsTool",
+        "typeVersion": 4.7,
+        "position": [
+          688,
+          384
+        ],
+        "id": "8336910d-6b50-4560-bebc-193c8164bff5",
+        "name": "Edit",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "TegIyIzcGUDmULvl",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "clear",
+          "documentId": {
+            "__rl": true,
+            "value": "1rOtf0P9Jswqd8l9G4OVh9z7H7dvfdzvs6ROq2T20Wnw",
+            "mode": "list",
+            "cachedResultName": "Joblist",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rOtf0P9Jswqd8l9G4OVh9z7H7dvfdzvs6ROq2T20Wnw/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rOtf0P9Jswqd8l9G4OVh9z7H7dvfdzvs6ROq2T20Wnw/edit#gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheetsTool",
+        "typeVersion": 4.7,
+        "position": [
+          816,
+          224
+        ],
+        "id": "f92f9c9e-38b7-481b-aa75-9f09c81483e0",
+        "name": "Clear",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "TegIyIzcGUDmULvl",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "abfc95d9-3901-482f-aed5-81e6b508be6f",
+                "name": "websites",
+                "value": "Process the following websites:  \n\nhttps://join.com/companies/tamschick \nhttps://artcom.de/en/jobs/ \nhttps://www.kms-team.com/en/jobs/ \nhttps://www.bureau-n.de/jobs/ \nhttps://www.atelier-brueckner.com/de/jobs \nhttps://schmidhuber.jobs.personio.de/ \nhttps://www.factsfiction.de/en/jobs \nhttps://bueroalba.de/freelance \nhttps://www.jvm.com/jobs/ \nhttps://demner.group/jobs/ \nhttps://tbwa.at/category/jobs/ \nhttps://studiodumbar.com/jobs \nhttps://www.jasonbruges.com/careers-1 \nhttps://marshmallowlaserfeast.com/information/ \nhttps://www.steinersarnen.ch/offenestellen \nhttps://www.hyperquake.com/careers \nhttps://dataland.art/careers/\n",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -608,
+          448
+        ],
+        "id": "da33689e-0537-4b25-a6de-0eca7eb94b1e",
+        "name": "Websites1"
+      }
+    ],
+    "connections": {
+      "When chat message received": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Fixed Prompt",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Read CV",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Websites",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Simple Memory": {
+        "ai_memory": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_memory",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Upload file in Google Drive": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "DeepSeekR1": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent1",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Qwen3.6": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Agent": {
+        "main": [
+          []
+        ]
+      },
+      "AI Agent1": {
+        "main": [
+          []
+        ]
+      },
+      "Basic LLM Chain": {
+        "main": [
+          [
+            {
+              "node": "Split Out",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split Out": {
+        "main": [
+          [
+            {
+              "node": "Switch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Switch": {
+        "main": [
+          []
+        ]
+      },
+      "Simple Memory1": {
+        "ai_memory": [
+          [
+            {
+              "node": "AI Agent1",
+              "type": "ai_memory",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create": {
+        "ai_tool": [
+          []
+        ]
+      },
+      "Get": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Tavily": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gmail": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge": {
+        "main": [
+          [
+            {
+              "node": "Build Prompt",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Prompt": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fixed Prompt": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Read CV": {
+        "main": [
+          [
+            {
+              "node": "Extract from File",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract from File": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 2
+            }
+          ]
+        ]
+      },
+      "Websites": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 3
+            }
+          ]
+        ]
+      },
+      "Edit": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Clear": {
+        "ai_tool": [
+          []
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "nodeGroups": [],
+    "pinData": {},
+    "versionId": "8f93af9c-def3-433c-b2e7-840c8d751d30",
+    "activeVersionId": null,
+    "versionCounter": 528,
+    "triggerCount": 0,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-06-08T06:35:00.005Z",
+        "createdAt": "2026-06-08T06:35:00.005Z",
+        "role": "workflow:owner",
+        "workflowId": "nNi2GCKei7EmdzUl",
+        "projectId": "byVWfFHmU6imD002",
+        "project": {
+          "updatedAt": "2026-06-07T08:46:52.498Z",
+          "createdAt": "2026-06-07T08:43:18.289Z",
+          "id": "byVWfFHmU6imD002",
+          "name": "Achim Karim <d_o_z_e_r@gmx.net>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "982552bf-c16a-48d5-aecc-54ef0104226c"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  }
+]

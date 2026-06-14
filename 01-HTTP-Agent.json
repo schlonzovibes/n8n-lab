@@ -1,0 +1,197 @@
+[
+  {
+    "updatedAt": "2026-06-10T09:32:52.580Z",
+    "createdAt": "2026-06-07T08:50:29.002Z",
+    "id": "QLvMYEAGkCEjJUVH",
+    "name": "01-HTTP-Agent",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "helloworld",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "677ca2c7-28e3-4f42-b43f-79c953632d9a",
+        "name": "Webhook",
+        "webhookId": "c2d5e0ec-ea5b-4e46-b69a-0f2a77ab2758",
+        "alwaysOutputData": false
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "b2a6f602-6a19-4aa8-8aad-1b519abd8c93",
+                "name": "greeting",
+                "value": "=Aello {{ $json.body.name }}, thank you for reaching out to us about {{ $json.body.topic }}. Let's talk!",
+                "type": "string"
+              },
+              {
+                "id": "32fa9bbe-89e4-46ca-9777-317bf677b82a",
+                "name": "",
+                "value": "",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          208,
+          0
+        ],
+        "id": "dd08b745-1162-4219-8c2f-1b408897fb8c",
+        "name": "Edit Fields"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          400,
+          0
+        ],
+        "id": "b6677e59-9c87-4dd3-a9b7-617132a45e94",
+        "name": "Respond to Webhook"
+      },
+      {
+        "parameters": {
+          "jsCode": "const parsed = JSON.parse($json.message.content);\n\nreturn [\n  {\n    json: parsed\n  }\n];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          416,
+          -256
+        ],
+        "id": "2b55b687-2986-40f1-93b8-c2400077cdf7",
+        "name": "Code in JavaScript1"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:11434/api/chat",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "{\n  \"model\": \"qwen3.6:27b\",\n  \"messages\": [\n    {\"role\": \"system\", \"content\": \"Du bist ein Klassifikator für deutsche Support-E-Mails. Antworte ausschließlich mit gültigem JSON: {\\\"summary\\\": string, \\\"urgency\\\": \\\"low\\\"|\\\"medium\\\"|\\\"high\\\", \\\"category\\\": string}. Kein Fließtext, kein Markdown, keine Code-Fences.\"},\n    {\"role\": \"user\", \"content\": \"Sehr geehrte Damen und Herren, mein Telefon klingelt seit gestern nicht mehr, obwohl ich Anrufe erwarte. Bitte dringend prüfen!\"}\n  ],\n  \"stream\": false,\n  \"options\": {\"temperature\": 0.1}\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          208,
+          -256
+        ],
+        "id": "009e6f6f-68e6-4734-a835-4201507f8ce3",
+        "name": "HTTP Request"
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          -16,
+          -256
+        ],
+        "id": "15f467f8-8585-41c3-a326-0ce1d3f8ed7a",
+        "name": "When clicking ‘Execute workflow’"
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Edit Fields",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Edit Fields": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP Request": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "When clicking ‘Execute workflow’": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "meta": null,
+    "nodeGroups": [],
+    "pinData": {},
+    "versionId": "c053c99d-662c-4f48-826f-183b6eda712b",
+    "activeVersionId": null,
+    "versionCounter": 38,
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-06-07T08:50:29.004Z",
+        "createdAt": "2026-06-07T08:50:29.004Z",
+        "role": "workflow:owner",
+        "workflowId": "QLvMYEAGkCEjJUVH",
+        "projectId": "byVWfFHmU6imD002",
+        "project": {
+          "updatedAt": "2026-06-07T08:46:52.498Z",
+          "createdAt": "2026-06-07T08:43:18.289Z",
+          "id": "byVWfFHmU6imD002",
+          "name": "Achim Karim <d_o_z_e_r@gmx.net>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "982552bf-c16a-48d5-aecc-54ef0104226c"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  }
+]
